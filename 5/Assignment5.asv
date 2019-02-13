@@ -1,0 +1,308 @@
+%Agnibh Dasgupta - A02292865 Assignment 6
+
+%-----Problem 1.1-----
+
+im = imread('City.jpg');
+SE = strel('square',3);
+res1 = imerode(im,SE);
+res2 = imdilate(im,SE);
+res = res2 - res1;
+
+figure;
+
+imshow(res);
+title('Dilation - Erosion');
+
+pause;
+
+%-----Finish Solving Problem 1.1-----
+
+%-----Problem 1.2-----
+
+im = imread('SmallSquares.tif');
+Foreim = im;
+ForeSE = [0 1 0; 0 0 1; 0 0 0]; % SE for Foreground
+Foreres = imerode(Foreim,ForeSE);
+
+Backim = 1-im; %Inverting
+BackSE = [1 0 0; 1 0 0; 1 1 1]; % SE for Background
+Backres = imerode(Backim,BackSE);
+
+res = Foreres&Backres; % Intersection
+l = length(find(res));
+
+disp('No. of pixels found =');
+disp(l);
+
+figure;
+
+imshow(res);
+title('Lower');
+
+pause;
+
+%-----Finish Solving Problem 1.2-----
+
+%-----Problem 1.3-----
+
+im = imread('Wirebond.tif');
+
+SE = strel('square',14);
+imb = imerode(im,SE);
+
+SE = strel('square',9);
+imc = imerode(im,SE);
+
+SE = strel('square',35);
+imd = imerode(im,SE);
+
+figure;
+
+subplot(1,3,1);
+imshow(imb);
+title('(b) Desired Image 1');
+
+subplot(1,3,2);
+imshow(imc);
+title('(c) Desired Image 2');
+
+subplot(1,3,3);
+imshow(imd);
+title('(c) Desired Image 3');
+
+pause;
+
+%-----Finish Solving Problem 1.3-----
+
+%-----Problem 1.4-----
+
+im = imread('Shapes.tif');
+
+SE = strel('square',20);
+imb = imopen(im,SE);
+
+SE = strel('square',17);
+imc = imclose(im,SE);
+
+SE = strel('square',20);
+imd = imclose(imb,SE);
+
+figure;
+
+subplot(1,3,1);
+imshow(imb);
+title('(b) Desired Image 1');
+
+subplot(1,3,2);
+imshow(imc);
+title('(c) Desired Image 2');
+
+subplot(1,3,3);
+imshow(imd);
+title('(c) Desired Image 3');
+
+pause;
+
+%-----Finish Solving Problem 1.4-----
+
+%-----Problem 1.5-----
+
+im = imread('Dowels.tif');
+
+SE = strel('disk',5);
+
+res1 = imopen(im,SE);
+res1 = imclose(res1,SE);
+
+res2 = imclose(im,SE);
+res2 = imopen(res2,SE);
+
+figure;
+
+subplot(1,2,1);
+imshow(res1);
+title('Open-Close');
+
+subplot(1,2,2);
+imshow(res2);
+title('Close-Open');
+
+pause;
+
+res1 = im;
+res2 = im;
+
+for i=2:5 % Loop for repetition
+    SE = strel('disk',i);
+    
+    res1 = imopen(res1,SE);
+    res1 = imclose(res1,SE);
+    
+    res2 = imclose(res2,SE);
+    res2 = imopen(res2,SE);
+end
+
+figure;
+
+subplot(1,2,1);
+imshow(res1);
+title('Series of Open-Close');
+
+subplot(1,2,2);
+imshow(res2);
+title('Series of Close-Open');
+
+pause;
+
+%-----Finish Solving Problem 1.5-----
+
+%-----Problem 2.1-----
+
+im = imread('Ball.tif');
+SE = strel('square',3);
+
+[labelIm, num] = FindComponentLabels(im, SE);
+[scaledIm, ~] = Scaling(labelIm, [0,255]); % Scaling
+
+disp('No. of connected objects(me):');
+disp(num);
+
+figure;
+
+scaledIm = uint8(scaledIm);
+imshow(scaledIm);
+title('Connected Objects(me)');
+
+pause;
+            
+%-----Finish Solving Problem 2.1-----
+
+%-----Problem 2.2-----
+
+[L,n] = bwlabel(im);
+
+[scaledIm, ~] = Scaling(L, [0,255]); % Scaling
+
+disp('No. of connected objects(MATLAB):');
+disp(n);
+
+figure;
+
+scaledIm = uint8(scaledIm);
+imshow(scaledIm);
+title('Connected Objects(MATLAB)');
+
+pause;
+
+%-----Finish Solving Problem 2.2-----
+
+%-----Problem 2.3-----
+
+clearborderIm = labelIm;
+[r,c] = size(im);
+
+for i=1:r
+    for j=1:c
+        % Checking if we're at the border and if an object exists there
+        if ((i==1||j==1||i==r||j==c) && clearborderIm(i,j)~=0)
+            temp = clearborderIm(i,j);
+            clearborderIm(clearborderIm==temp)=0; %removing the object
+        end
+    end
+end
+
+num = length(unique(clearborderIm(:)))-1;
+
+[scaledIm, ~] = Scaling(clearborderIm, [0,255]); % Scaling
+            
+disp('No. of connected objects not residing on the border(me):');
+disp(num);
+
+figure;
+
+subplot(1,2,1);
+imshow(im);
+title('Original Image');
+
+subplot(1,2,2);
+scaledIm = uint8(scaledIm);
+imshow(scaledIm);
+title('Connected Objects not residing on the border(me)');
+
+pause;
+
+%-----Finish Solving Problem 2.3-----
+
+%-----Problem 2.4-----
+
+clearborderIm2 = imclearborder(labelIm);
+
+num2 = length(unique(clearborderIm2(:)))-1;
+
+[scaledIm2, ~] = Scaling(clearborderIm2, [0,255]); % Scaling
+
+disp('No. of connected objects not residing on the border(MATLAB):');
+disp(num2);
+
+figure;
+
+subplot(1,2,1);
+imshow(scaledIm);
+title('Connected Objects not residing on the border(me)');
+
+subplot(1,2,2);
+scaledIm2 = uint8(scaledIm2);
+imshow(scaledIm2);
+title('Connected Objects not residing on the border(MATLAB)');
+
+pause;
+
+%-----Finish Solving Problem 2.4-----
+
+%-----Problem 2.5-----
+
+temp = unique(clearborderIm(:)); % Vector to store the labels in the image
+l=length(temp);
+freq = zeros(l,1);
+
+for i=1:l
+    freq(i) = length(find(clearborderIm==temp(i))); % Vector to store the frequencies of the corresponding labels in temp
+end
+
+minfreqoflabel = min(freq); % Smallest frequency of a label in the image (isolated objects will have smallest frequencies)
+
+for i=1:r
+    for j=1:c
+        freqoflabel = freq(temp==clearborderIm(i,j)); % frequency of current pixel in the image
+         % Checking if the freq is sufficiently larger than freq of
+         % isolated object and that the pixel is not 0
+        if (freqoflabel > 1.5*minfreqoflabel && clearborderIm(i,j)~=0)
+            clearborderIm(clearborderIm==clearborderIm(i,j))=0; %Set blobs with bigger frequency of labels = 0
+        end
+    end
+end
+
+num = length(unique(clearborderIm(:)))-1; % -1 since 0 is part of the vector
+
+[scaledIm, ~] = Scaling(clearborderIm, [0,255]); % Scaling
+
+disp('No. of isolated objects not residing on the border:');
+disp(num);
+
+figure;
+
+subplot(1,2,1);
+imshow(im);
+title('Original Image');
+
+subplot(1,2,2);
+scaledIm = uint8(scaledIm);
+imshow(scaledIm);
+title('Isolated Objects not residing on the border');
+
+pause;
+
+%-----Finish Solving Problem 2.5-----
+
+clear;
+close('all');
