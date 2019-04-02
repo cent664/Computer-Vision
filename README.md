@@ -1,2 +1,2 @@
 # Computer-Vision
-Assignments from Computer Vision (6680)
+Assignments and final project on Computer Vision (6680)
